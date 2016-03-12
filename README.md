@@ -1,2 +1,2 @@
 # MLPpourCaro
-MLP network
+MLP network in Java
