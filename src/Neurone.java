@@ -19,16 +19,15 @@ public class Neurone {
 			entrees[i]=donnees[k];
 			k++;
 		}
-		sortie=donnees[k];
-		
 	}
 	
-	public void passeAvant(){
+	public void calculerSortie(){
 		activation = 0.0;
 		for(int i=0; i<nbEntrees; i++){
 			activation += entrees[i]*poids[i];
 		}
-		sortie = 1/1+Math.exp(-activation);
+		double buffer = Math.exp(2.0*activation);
+		sortie = (buffer-1)/(buffer+1);
 	}
 	
 	public void initPoids(double intervalle){
