@@ -5,6 +5,7 @@ public class Main {
 		// TODO Auto-generated method stub
 
 		Pretraitement pr = new Pretraitement("data/glass.data");
+		pr.bordel();
 		double[][] data = pr.getDataTable();
 		
 		for(int i = 0; i < data.length; i++){
