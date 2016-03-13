@@ -3,11 +3,11 @@ public class Neurone {
 	private int nbEntrees;
 	private double[] poids;
 	private double[] entrees;
-	private double sortie;
+	public double sortie;
 	private double activation;
-	private double gradient;
+	public double gradient;
 	
-	public Neurone(int nbE, int nbS){
+	public Neurone(int nbE){
 		nbEntrees = nbE;
 		entrees = new double[nbEntrees];
 		poids = new double[nbEntrees];
@@ -28,12 +28,7 @@ public class Neurone {
 		for(int i=0; i<nbEntrees; i++){
 			activation += entrees[i]*poids[i];
 		}
-		sortie = fonction(activation);
-	}
-	
-	public void setGradient(double g){
-		gradient = g;
-		
+		sortie = 1/1+Math.exp(-activation);
 	}
 	
 	public void initPoids(double intervalle){
