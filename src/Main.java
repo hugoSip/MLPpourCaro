@@ -14,6 +14,15 @@ public class Main {
 			}
 			System.out.println("");
 		}
+		System.out.println("");
+		Reseau reseau = new Reseau(3,10,data);
+		for(int i =0; i<2000; i++){
+			reseau.apprendre();
+		}
+		double[]sortie = reseau.trouverClasse(data[data.length-1]);
+		for(int i = 0; i < sortie.length; i++){
+			System.out.print(sortie[i] + " | ");
+		}
 	}
 
 }

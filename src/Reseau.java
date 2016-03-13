@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 
 public class Reseau {
 
@@ -12,24 +14,46 @@ public class Reseau {
 	double coefDerivee = 1.0;
 	double coefApprentissage = 0.1;
 	
-	public Reseau (int nbCou, int nbNeuronesParCouche, int nbSor, double[][] donnees){
-		nbCouches = nbCou-1;
-		couches =  new Couche[nbCou];
-		nbSorties = nbSor;
+	public Reseau (int nbCouche, int nbNeuronesParCouche, double[][] donnees){
+		nbCouches = nbCouche-1;
+		couches =  new Couche[nbCouches];
 		nbNeuronesParCoucheCachee = nbNeuronesParCouche;
 		nbEntrees = donnees[0].length-1;
 		nbExemples = donnees.length;
-		remplirCouches();
+		entrees = new double[nbExemples][nbEntrees];
+		sorties = new double[nbExemples];
 		diviserEntreesSorties(donnees);
+		trouverNbSorties();
+		remplirCouches();
+	}
+	
+	public void trouverNbSorties(){
+		nbSorties = 0;
+		List <Double>listeSortie = new ArrayList<Double>();
+		for(int i = 0; i<nbExemples; i++){
+			if(!listeSortie.contains(sorties[i])){
+				listeSortie.add(sorties[i]);
+				nbSorties++;
+			}
+		}
 	}
 	
 	public void apprendre(){
 		for(int i =0; i<nbExemples; i++){
-			aller(i);
+			aller(entrees[i]);
 			calculerGradientErreurSortie(i);
 			retour();
 			miseAJourPoids();
 		}
+	}
+	
+	public double [] trouverClasse(double [] exemple){
+		aller(exemple);
+		double sortie[] = new double[nbSorties];
+		for(int i =0; i< nbSorties; i++){
+			sortie[i]=couches[nbCouches-1].getNeurone(i).sortie;
+		}
+		return sortie;
 	}
 	
 	public void diviserEntreesSorties(double[][] donnees){
@@ -66,8 +90,7 @@ public class Reseau {
 		return (coefDerivee * (1.0+fa) * (1.0-fa));
 	}
 	
-	public void aller(int idExemple){
-		double [] exemple = entrees[idExemple];
+	public void aller(double[] exemple){
 		int nbEntree;
 		couches[0].aller(exemple);
 		for(int i = 1;i<nbCouches;i++){
@@ -83,7 +106,7 @@ public class Reseau {
 	public void retour(){
 		double deriveeSigmoide;
 		double somme;
-		for(int i = nbCouches; i>=0;i--){
+		for(int i = nbCouches-2; i>=0;i--){
 			for(int j =0; j< couches[i].nbNeurones;j++){
 				deriveeSigmoide = deriveeSigmoide(couches[i].getNeurone(j).sortie);
 				somme = 0.0;
