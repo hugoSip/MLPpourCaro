@@ -3,60 +3,106 @@ public class Reseau {
 
 	private Couche[] couches;
 	private int nbCouches;
+	private int nbSorties;
+	private int nbEntrees;
+	private int nbExemples;
+	private int nbNeuronesParCoucheCachee;
+	private double[][] entrees;
+	private double[] sorties;
+	double coefDerivee = 1.0;
+	double coefApprentissage = 0.1;
 	
-	public Reseau (int nbCou, int nbNeuroneParCouche, int nbEnt, int nbSor){
-		nbCouches = nbCou;
+	public Reseau (int nbCou, int nbNeuronesParCouche, int nbSor, double[][] donnees){
+		nbCouches = nbCou-1;
 		couches =  new Couche[nbCou];
-		int nbNeurones = nbNeuroneParCouche;
-		int nbEntrees = nbEnt;
-		for(int i = 0; i<nbCouches; i++){
-			if(i == nbCouches - 1){
-				nbNeurones = nbSor;
-			}
-			Couche couche = new Couche(nbNeurones, nbEntrees);
-			couches[i]= couche;
-			nbEntrees = nbNeurones;
+		nbSorties = nbSor;
+		nbNeuronesParCoucheCachee = nbNeuronesParCouche;
+		nbEntrees = donnees[0].length-1;
+		nbExemples = donnees.length;
+		remplirCouches();
+		diviserEntreesSorties(donnees);
+	}
+	
+	public void apprendre(){
+		for(int i =0; i<nbExemples; i++){
+			aller(i);
+			calculerGradientErreurSortie(i);
+			retour();
+			miseAJourPoids();
 		}
 	}
 	
-	
-	
-	
-	
-	void gradsor(int numex)  //calcul des gradients d'erreur, sur la couche de sortie
-	{
-	  int i;
-	  double dsig;  //derivee de la sigmoide
-
-	  for (i=0;i<dimsor;i++)
-	    { dsig=deriv(res.couche[res.nbcou-1].neurone[i].s);
-	      res.couche[res.nbcou-1].neurone[i].y=2*dsig*(app.sd[numex][i]-res.couche[res.nbcou-1].neurone[i].s);
-	    }
+	public void diviserEntreesSorties(double[][] donnees){
+		for(int i =0; i<nbExemples;i++){
+			for(int j=0; j<nbEntrees; j++){
+				entrees[i][j]=donnees[i][j];
+			}
+			sorties[i]=donnees[i][nbEntrees];
+		}
 	}
-
-	void retour()  //passe arriere : calcul des gradients retropropages, dans les couches cachees
-	{
-	  int i,m,k;
-	  double dsig;
-	  double somm;
-
-	  for (k=res.nbcou-2;k>0;k--)
-	    for (i=0;i<res.couche[k].nbneu;i++)
-	      { dsig=deriv(res.couche[k].neurone[i].s);
-		somm=0.0;
-		for(m=0;m<res.couche[k+1].nbneu;m++)
-		  somm+=res.couche[k+1].neurone[m].w[i]*res.couche[k+1].neurone[m].y;
-		res.couche[k].neurone[i].y=dsig*somm;
-	      }
+	
+	public void remplirCouches(){
+		int nbEntree=nbEntrees;
+		for(int i = 0; i<nbCouches; i++){
+			if(i == nbCouches - 1){
+				nbNeuronesParCoucheCachee = nbSorties;
+			}
+			Couche couche = new Couche(nbNeuronesParCoucheCachee, nbEntree);
+			couches[i]= couche;
+			nbEntree = nbNeuronesParCoucheCachee;
+		}
 	}
-
-	void modifw()  //mise a jour des poids du reseau (toutes les couches)
-	{
-	  int i,j,k;
-
-	  for (k=1;k<res.nbcou;k++)
-	    for (i=0;i<res.couche[k].nbneu;i++)
-	      for (j=0;j<res.couche[k].neurone[i].nbent;j++)
-		res.couche[k].neurone[i].w[j]+=alpha*res.couche[k].neurone[i].y*res.couche[k].neurone[i].x[j];
+	
+	public void calculerGradientErreurSortie(int idExemple){
+		double deriveeSigmoide;
+		for(int i=0; i<nbSorties; i++){
+			Neurone neurone = couches[nbCouches-1].getNeurone(i);
+			deriveeSigmoide = deriveeSigmoide(neurone.sortie);
+			neurone.gradient = 2 * deriveeSigmoide * (sorties[idExemple]-neurone.sortie);
+		}
+	}
+	
+	public double deriveeSigmoide(double fa){
+		return (coefDerivee * (1.0+fa) * (1.0-fa));
+	}
+	
+	public void aller(int idExemple){
+		double [] exemple = entrees[idExemple];
+		int nbEntree;
+		couches[0].aller(exemple);
+		for(int i = 1;i<nbCouches;i++){
+			nbEntree = couches[i-1].nbNeurones;
+			double[] entree = new double[nbEntree];
+			for(int j = 0; j<nbEntree; j++){
+				entree[j]=couches[i-1].getNeurone(j).sortie;
+			}
+			couches[i].aller(entree);
+		}
+	}
+	
+	public void retour(){
+		double deriveeSigmoide;
+		double somme;
+		for(int i = nbCouches; i>=0;i--){
+			for(int j =0; j< couches[i].nbNeurones;j++){
+				deriveeSigmoide = deriveeSigmoide(couches[i].getNeurone(j).sortie);
+				somme = 0.0;
+				for(int k = 0; k<couches[i+1].nbNeurones; k++){
+					somme += couches[i+1].getNeurone(k).poids[j]*couches[i+1].getNeurone(k).gradient;
+				}
+				couches[i].getNeurone(j).gradient = deriveeSigmoide*somme;
+			}
+		}
+	}
+	
+	public void miseAJourPoids(){
+		for(int i = 0; i<nbCouches; i++){
+			for(int j = 0; j<couches[i].nbNeurones; j++){
+				for(int k = 0; k<couches[i].getNeurone(j).nbEntrees; k++){
+					Neurone neurone = couches[i].getNeurone(j);
+					neurone.poids[k]+=coefApprentissage*neurone.gradient*neurone.entrees[k];
+				}
+			}
+		}
 	}
 }

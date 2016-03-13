@@ -2,7 +2,7 @@
 public class Couche {
 
 	private Neurone[] neurones;
-	private int nbNeurones;
+	public int nbNeurones;
 	private int nbEntrees;
 	
 	public Couche(int nbNeu, int nbEnt){
@@ -21,15 +21,14 @@ public class Couche {
 		}
 	}
 	
-	public void setDonneeEntree(int[] donnees){
+	public void aller(double[] donnees){
 		for(int i = 0; i<nbNeurones; i++){
 			neurones[i].setDonneesEntree(donnees);
+			neurones[i].calculerSortie();
 		}
 	}
 	
-	public void calculerSortie(){
-		for(int i = 0; i<nbNeurones; i++){
-			neurones[i].calculerSortie();
-		}
+	public Neurone getNeurone(int i){
+		return neurones[i];
 	}
 }
