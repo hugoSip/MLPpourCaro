@@ -52,6 +52,44 @@ public class Pretraitement {
 		
 	}
 	
+	public void deleteColumn(int del){
+		double[][] newDataDouble = new double[nbLine][dataLineLength-1];
+		
+		for(int i = 0; i < outputDataDouble.length; i++){
+			for(int j = 0; j < outputDataDouble[0].length; j++){
+				if(j < del){
+					newDataDouble[i][j] = outputDataDouble[i][j];
+				}
+				else if(j > del){
+					newDataDouble[i][j-1] = outputDataDouble[i][j];
+				}
+			}
+		}
+		dataLineLength--;
+		outputDataDouble = new double[nbLine][dataLineLength];
+		outputDataDouble = newDataDouble;
+	}
+	
+	public void bordel(){
+		for(int i = 0; i < 10*nbLine; i++){
+			int l1 = (int)(Math.random()*nbLine);
+			int l2 = (int)(Math.random()*nbLine);
+			this.swapLine(l1, l2);
+		}
+	}
+	
+	public void swapLine(int l1, int l2){
+		double[] lineTampon = new double[dataLineLength];
+		for(int i = 0; i < outputDataDouble[l1].length; i++){
+			lineTampon[i] = outputDataDouble[l1][i];
+		}
+		for(int i = 0; i < outputDataDouble[l1].length; i++){
+			outputDataDouble[l1][i] = outputDataDouble[l2][i];
+		}
+		for(int i = 0; i < outputDataDouble[l1].length; i++){
+			outputDataDouble[l2][i] = lineTampon[i];
+		}
+	}
 
 	public double[][] getDataTable(){
 		return outputDataDouble;
