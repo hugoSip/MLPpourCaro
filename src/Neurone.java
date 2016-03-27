@@ -4,7 +4,7 @@ public class Neurone {
 	public double[] poids;
 	public double[] entrees;
 	public double sortie;
-	private double activation;
+	public double activation;
 	public double gradient;
 	double coefSigmo = 2.0;
 	
@@ -27,13 +27,16 @@ public class Neurone {
 		for(int i=0; i<nbEntrees; i++){
 			activation += entrees[i]*poids[i];
 		}
+		/*
 		double buffer = Math.exp(coefSigmo*activation);
-		sortie = (buffer-1)/(buffer+1);
+		sortie = (buffer-1.0)/(buffer+1.0);
+		*/
+		sortie = 1.0/(1.0+Math.exp(-activation));
 	}
 	
 	public void initPoids(double intervalle){
 		for(int i=0; i<nbEntrees; i++){
-			poids[i]=Math.random()*intervalle*2-intervalle;
+			poids[i]=(Math.random()*intervalle*2.0)-intervalle;
 		}
 	}
 }
